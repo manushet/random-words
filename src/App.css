@@ -1,1 +1,8 @@
+.red-color {
+    color: red;
+}
 
+.link {
+    cursor: pointer;
+    text-decoration: none;
+}

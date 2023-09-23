@@ -17,7 +17,6 @@ function App() {
   const loadData = () => {
     fetch("https://readu.site/cgi-bin/words-reader.php", { method: "GET" })
     .then(res => {
-      //console.log(res);
       if (res.ok) {
         const text = res.text();
         return text;
@@ -30,6 +29,9 @@ function App() {
         shuffleArray(arr);
         setWords(arr);
       }
+      else {
+        setWords([]);
+      }
     })
     .catch(err => console.error(err));
   }
@@ -38,7 +40,28 @@ function App() {
     loadData();
   }, []);
 
-  const onWordAdd = (word) => {
+  const onWordAdd = (word) => { 
+    if (!words || (words.length === 0) || (words.indexOf(word) === -1)) {
+      fetch("https://readu.site/cgi-bin/words-handler.php", { 
+        method: "POST", 
+        cache: "no-cache",
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+        },      
+        body: new URLSearchParams({
+          'word': word,
+          'opt': "add",
+        })
+      })
+      .then(res => {
+        //console.log(res.text());
+        loadData();
+      })
+      .catch(err => console.error(err));
+    }
+  };
+
+  const onWordDelete = (word) => {  
     fetch("https://readu.site/cgi-bin/words-handler.php", { 
       method: "POST", 
       cache: "no-cache",
@@ -47,18 +70,20 @@ function App() {
       },      
       body: new URLSearchParams({
         'word': word,
+        'opt': "delete",
       })
     })
     .then(res => {
+      //console.log(res.text());
       loadData();
     })
     .catch(err => console.error(err));
-  }
+  };  
 
   return (
     <div className="container">
       <AddWordForm onWordAdd={onWordAdd}/>
-      <WordList words={words}/>
+      <WordList words={words} onWordDelete={onWordDelete}/>
     </div>
   );
 }
